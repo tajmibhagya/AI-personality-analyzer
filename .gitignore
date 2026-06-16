@@ -19,4 +19,5 @@ env/
 # Build / IDE
 .vscode/
 .idea/
-EOF
+EOF.venv310/
+frontend/.streamlit/secrets.toml
