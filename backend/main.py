@@ -6,6 +6,10 @@ from models.personality import PersonalityModel
 from models.emotion import EmotionModel
 from schemas import AnalyzeRequest, AnalyzeResponse, TextStats
 
+from features.recommender import recommend as run_recommend
+from schemas import RecommendRequest, RecommendResponse
+from rag.retriever import warm_up
+
 MIN_CHARS = 50
 models: dict = {}
 
@@ -16,6 +20,8 @@ async def lifespan(app: FastAPI):
     models["personality"] = PersonalityModel()
     print("[startup] loading emotion model...")
     models["emotion"] = EmotionModel()
+    print("[startup] warming up KBs...")
+    warm_up(["books", "films", "music", "activities"])
     print("[startup] ready")
     yield
     models.clear()
@@ -53,3 +59,12 @@ def analyze(req: AnalyzeRequest):
         emotion=emotion,
         text_stats=TextStats(char_count=len(text), word_count=len(text.split())),
     )
+@app.post("/recommend", response_model=RecommendResponse)
+def recommend_endpoint(req: RecommendRequest):
+    result = run_recommend(
+        personality=req.personality,
+        medium=req.medium,
+        mood=req.mood,
+        exclude_ids=req.exclude_ids,
+    )
+    return RecommendResponse(**result)
