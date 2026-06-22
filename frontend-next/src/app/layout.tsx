@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
+import { ThemeProvider } from "@/lib/theme/ThemeContext";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -28,8 +29,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${grotesk.variable}`}>
-      <body className="font-sans">{children}</body>
+    <html
+      lang="en"
+      className={`${jakarta.variable} ${grotesk.variable}`}
+      data-theme="dark"
+      suppressHydrationWarning
+    >
+      <body className="font-sans">
+        <ThemeProvider defaultTheme="dark">{children}</ThemeProvider>
+      </body>
     </html>
   );
 }
