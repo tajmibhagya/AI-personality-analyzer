@@ -10,6 +10,15 @@ from features.recommender import recommend as run_recommend
 from schemas import RecommendRequest, RecommendResponse
 from rag.retriever import warm_up
 
+from features.life_advisor import apply_to_life
+from schemas import ApplyToLifeRequest, ApplyToLifeResponse
+
+from fastapi import UploadFile, File, Form
+from features.content_extractor import (
+    extract_from_pdf_bytes,
+    extract_from_url,
+    normalize_text,
+)
 MIN_CHARS = 50
 models: dict = {}
 
@@ -31,7 +40,8 @@ app = FastAPI(title="AI Personality Analyzer", version="0.1.0", lifespan=lifespa
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -68,3 +78,41 @@ def recommend_endpoint(req: RecommendRequest):
         exclude_ids=req.exclude_ids,
     )
     return RecommendResponse(**result)
+
+@app.post("/extract")
+async def extract_endpoint(
+    pdf: UploadFile = File(None),
+    url: str = Form(None),
+    raw_text: str = Form(None),
+):
+    """Extract clean text from a PDF upload, URL, or raw text paste."""
+    text = ""
+
+    if pdf is not None:
+        try:
+            pdf_bytes = await pdf.read()
+            text = extract_from_pdf_bytes(pdf_bytes)
+        except Exception as e:
+            return {"error": f"Could not parse PDF: {e}", "text": ""}
+    elif url:
+        text = extract_from_url(url) or ""
+        if not text:
+            return {"error": "Could not fetch or extract content from URL", "text": ""}
+    elif raw_text:
+        text = raw_text
+    else:
+        return {"error": "Provide a pdf, url, or raw_text", "text": ""}
+
+    text = normalize_text(text)
+
+    if len(text) < 200:
+        return {"error": "Extracted text is too short (<200 chars).", "text": text}
+
+    return {"text": text, "char_count": len(text)}
+
+@app.post("/apply-to-life", response_model=ApplyToLifeResponse)
+def apply_to_life_endpoint(req: ApplyToLifeRequest):
+    result = apply_to_life(req.personality, req.article_text)
+    if "error" in result:
+        return ApplyToLifeResponse(error=result["error"])
+    return ApplyToLifeResponse(**result)

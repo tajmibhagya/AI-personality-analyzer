@@ -23,7 +23,8 @@ class Embedder:
     _instance = None  # singleton pattern — load the model only once per process
 
     def __new__(cls, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
-        if cls._instance is None:
+        if cls._instance is None or not hasattr(cls._instance, "model"):
+
             cls._instance = super().__new__(cls)
             print(f"[Embedder] Loading {model_name} (first time only)...")
             cls._instance.model = SentenceTransformer(model_name)

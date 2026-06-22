@@ -24,8 +24,7 @@ import numpy as np
 from rag.embedder import Embedder
 
 
-INDEX_DIR = Path("backend/index_store")
-
+INDEX_DIR = Path(__file__).resolve().parent.parent / "index_store"
 
 class KBIndex:
     """A persistent vector index over a JSONL knowledge base."""

@@ -1,95 +1,57 @@
 """
 Generator: takes a prompt + retrieved chunks, returns structured JSON.
 
-Uses HuggingFace's Inference API with Qwen2.5-7B-Instruct.
+Uses Groq's OpenAI-compatible API with Llama 3.1 8B.
 
-Unlike OpenAI, HF doesn't have a native JSON mode. We:
-1. Strongly instruct the model to return only JSON in the prompt
-2. Strip code fences and stray text from the response
-3. Parse defensively with a retry on JSON failure
+Groq is free, fast, and has a stable model catalog. We use the OpenAI SDK
+pointed at Groq's endpoint — it's a drop-in replacement.
 """
 
 import json
 import os
 import re
-import time
 
 from dotenv import load_dotenv
-from huggingface_hub import InferenceClient
+from openai import OpenAI
 
 load_dotenv()
 
 
 class Generator:
-    """Wraps a HuggingFace LLM call. Returns parsed JSON."""
+    """Wraps the Groq LLM call. Returns parsed JSON."""
 
     _instance = None
 
-    def __new__(cls, model: str = "Qwen/Qwen2.5-7B-Instruct"):
-        if cls._instance is None:
+    def __new__(cls, model: str = "llama-3.1-8b-instant"):
+        if cls._instance is None or not hasattr(cls._instance, "client"):
+
             cls._instance = super().__new__(cls)
-            token = os.getenv("HF_TOKEN")
-            if not token:
-                raise RuntimeError("HF_TOKEN missing — check your backend/.env file")
-            cls._instance.client = InferenceClient(token=token)
+            api_key = os.getenv("GROQ_API_KEY")
+            if not api_key:
+                raise RuntimeError("GROQ_API_KEY missing — check your backend/.env file")
+            cls._instance.client = OpenAI(
+                api_key=api_key,
+                base_url="https://api.groq.com/openai/v1",
+            )
             cls._instance.model = model
-            print(f"[Generator] Ready with {model}")
+            print(f"[Generator] Ready with Groq + {model}")
         return cls._instance
-
-    def _call_with_retry(
-        self,
-        messages: list[dict],
-        temperature: float,
-        max_tokens: int,
-        max_retries: int = 3,
-    ) -> str:
-        """Call HF Inference API with retries for 'model loading' errors."""
-        last_err = None
-        for attempt in range(max_retries):
-            try:
-                response = self.client.chat_completion(
-                    model=self.model,
-                    messages=messages,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                )
-                return response.choices[0].message.content
-
-            except Exception as e:
-                last_err = e
-                err_str = str(e).lower()
-                # HF returns "currently loading" on cold-start; retry after a wait
-                if "loading" in err_str or "503" in err_str:
-                    wait = 10 * (attempt + 1)  # 10s, 20s, 30s
-                    print(f"[Generator] Model loading, retrying in {wait}s "
-                          f"(attempt {attempt + 1}/{max_retries})...")
-                    time.sleep(wait)
-                    continue
-                # Other errors: re-raise immediately
-                raise
-
-        raise RuntimeError(f"Max retries exceeded. Last error: {last_err}")
 
     @staticmethod
     def _extract_json(text: str) -> dict:
         """Pull JSON out of the model's response, defensively.
 
-        Handles:
-        - Bare JSON: {"key": "value"}
-        - Fenced JSON: ```json\n{"key": "value"}\n```
-        - JSON embedded in chatter: "Sure! Here's the JSON: {...}"
+        Handles bare JSON, fenced JSON, and JSON embedded in chatter.
         """
-        # Strip whitespace
         text = text.strip()
 
-        # Remove markdown code fences if present
-        # Matches ```json...``` or ```...```
+        # Strip markdown code fences if present
         fence_pattern = r"^```(?:json)?\s*(.*?)\s*```$"
         match = re.match(fence_pattern, text, re.DOTALL)
         if match:
             text = match.group(1).strip()
 
-        # If still not pure JSON, find the first { and last } and extract between
+        # If still not pure JSON, find the outermost {...}
         if not text.startswith("{"):
             start = text.find("{")
             end = text.rfind("}")
@@ -105,30 +67,24 @@ class Generator:
         temperature: float = 0.4,
         max_tokens: int = 1500,
     ) -> dict:
-        """Call the LLM and return parsed JSON.
-
-        Args:
-            system_prompt: behavior instructions. Must clearly request JSON output.
-            user_prompt: the actual request.
-            temperature: 0.0 = deterministic, 1.0 = creative. 0.3-0.5 for structured output.
-            max_tokens: cap on response length.
-
-        Returns:
-            Parsed JSON as a Python dict, or {"error": "...", "raw": "..."} on failure.
-        """
-        # Reinforce JSON requirement at the end of the system prompt for safety
+        """Call the LLM and return parsed JSON."""
         reinforced_system = system_prompt + (
             "\n\nCRITICAL: Respond with ONLY valid JSON. No markdown fences, "
             "no preamble, no commentary. Just the raw JSON object."
         )
 
-        messages = [
-            {"role": "system", "content": reinforced_system},
-            {"role": "user", "content": user_prompt},
-        ]
-
         try:
-            raw = self._call_with_retry(messages, temperature, max_tokens)
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": reinforced_system},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens,
+                response_format={"type": "json_object"},  # Groq supports JSON mode
+            )
+            raw = response.choices[0].message.content
         except Exception as e:
             print(f"[Generator] API error: {e}")
             return {"error": f"LLM call failed: {str(e)}"}

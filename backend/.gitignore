@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.env
+*.env
+
+# Next.js
+frontend-next/node_modules/
+frontend-next/.next/
+frontend-next/.env.local
+frontend-next/.env*.local
