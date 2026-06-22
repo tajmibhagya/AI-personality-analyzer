@@ -13,7 +13,7 @@ API_URL = st.secrets.get("API_URL", "http://127.0.0.1:8001")
 
 st.set_page_config(page_title="Personality Analyzer", page_icon="🧠", layout="wide")
 
-st.title("🧠 AI Personality Analyzer")
+st.title("AI Personality Analyzer")
 st.caption("Big Five personality + emotional tone + personalized recommendations, from your writing.")
 
 # --- Sidebar ---
@@ -45,8 +45,11 @@ if "rec_history" not in st.session_state:
     st.session_state.rec_history = {}
 
 # --- Tabs ---
-tab_analyze, tab_recommend = st.tabs(["🧠 Analyze", "✨ Recommendations"])
-
+tab_analyze, tab_recommend, tab_apply = st.tabs([
+    "🧠 Analyze",
+    "✨ Recommendations",
+    "💡 Apply to my life",
+])
 
 # ============================================================
 # TAB 1: Analyze
@@ -130,10 +133,10 @@ with tab_recommend:
                 "Medium",
                 options=["books", "films", "music", "activities"],
                 format_func=lambda x: {
-                    "books": "📚 Books",
-                    "films": "🎬 Films",
-                    "music": "🎵 Music",
-                    "activities": "🎯 Activities",
+                    "books": "Books",
+                    "films": "Films",
+                    "music": "Music",
+                    "activities": "Activities",
                 }[x],
                 key="rec_medium",
             )
@@ -211,5 +214,153 @@ with tab_recommend:
                             badges = " ".join(f"`{t}`" for t in rec["trait_drivers"])
                             st.markdown(f"**Driven by:** {badges}")
 
-                        with st.expander("📖 Source data"):
-                            st.json(meta)
+                        with st.expander("More details"):
+                            detail_lines = []
+                            if meta.get("category"):
+                                detail_lines.append(f"**Category:** {meta['category'].replace('_', ' ').title()}")
+                            if meta.get("social_level"):
+                                detail_lines.append(f"**Social level:** {meta['social_level'].replace('_', ' ').title()}")
+                            if meta.get("energy_level"):
+                                detail_lines.append(f"**Energy:** {meta['energy_level'].title()}")
+                            if meta.get("indoor_outdoor"):
+                                detail_lines.append(f"**Setting:** {meta['indoor_outdoor'].title()}")
+                            if meta.get("time_commitment"):
+                                detail_lines.append(f"**Time:** {meta['time_commitment']}")
+                            if meta.get("where_to_find"):
+                                detail_lines.append(f"**Where to find:** {meta['where_to_find']}")
+                            if meta.get("tags"):
+                                detail_lines.append(f"**Tags:** {', '.join(meta['tags'])}")
+                            if meta.get("genres"):
+                                detail_lines.append(f"**Genres:** {', '.join(meta['genres'])}")
+
+                            if detail_lines:
+                                st.markdown("\n\n".join(detail_lines))
+
+                            # Personality fit reasoning — the actual interesting thing
+                            fit = meta.get("personality_fit", {})
+                            if fit.get("reasoning"):
+                                st.markdown(f"\n**Why this fits your profile:** {fit['reasoning']}")
+                                
+# ============================================================
+# TAB 3: Apply to my life
+# ============================================================
+with tab_apply:
+    if not st.session_state.personality:
+        st.info("👈 First analyze a writing sample in the **Analyze** tab.")
+    else:
+        st.markdown(
+            "Upload an article, paste a URL, or paste text. We'll suggest how its "
+            "ideas might apply *to you* given your personality — reflectively, not "
+            "prescriptively."
+        )
+
+        input_mode = st.radio(
+            "Input method",
+            ["📄 Upload PDF", "🔗 Paste URL", "📝 Paste text"],
+            horizontal=True,
+            key="apply_input_mode",
+        )
+
+        # We use session_state to persist the extracted text across reruns
+        if "apply_article_text" not in st.session_state:
+            st.session_state.apply_article_text = None
+
+        if input_mode == "📄 Upload PDF":
+            uploaded = st.file_uploader("Upload PDF", type=["pdf"], key="apply_pdf")
+            if uploaded and st.button("Extract & analyze", type="primary", key="apply_pdf_btn"):
+                with st.spinner("Extracting PDF..."):
+                    try:
+                        res = requests.post(
+                            f"{API_URL}/extract",
+                            files={"pdf": (uploaded.name, uploaded.getvalue(), "application/pdf")},
+                            timeout=120,
+                        )
+                        data = res.json()
+                    except Exception as e:
+                        st.error(f"Extract failed: {e}")
+                        st.stop()
+                if data.get("error"):
+                    st.error(data["error"])
+                else:
+                    st.session_state.apply_article_text = data["text"]
+                    st.success(f"Extracted {data['char_count']:,} characters.")
+
+        elif input_mode == "🔗 Paste URL":
+            url = st.text_input("Article URL", placeholder="https://...", key="apply_url")
+            if url and st.button("Extract & analyze", type="primary", key="apply_url_btn"):
+                with st.spinner("Fetching article..."):
+                    try:
+                        res = requests.post(
+                            f"{API_URL}/extract",
+                            data={"url": url},
+                            timeout=120,
+                        )
+                        data = res.json()
+                    except Exception as e:
+                        st.error(f"Fetch failed: {e}")
+                        st.stop()
+                if data.get("error"):
+                    st.error(data["error"])
+                else:
+                    st.session_state.apply_article_text = data["text"]
+                    st.success(f"Extracted {data['char_count']:,} characters.")
+
+        else:  # paste text
+            pasted = st.text_area(
+                "Paste article text",
+                height=250,
+                key="apply_pasted",
+                placeholder="Paste an essay, chapter, or article you're reading...",
+            )
+            if pasted and st.button("Analyze", type="primary", key="apply_text_btn"):
+                if len(pasted.strip()) < 200:
+                    st.warning("Please paste at least 200 characters.")
+                else:
+                    st.session_state.apply_article_text = pasted
+
+        # If we have article text, call the apply endpoint
+        if st.session_state.apply_article_text:
+            with st.spinner("Reflecting on how this applies to you..."):
+                try:
+                    res = requests.post(
+                        f"{API_URL}/apply-to-life",
+                        json={
+                            "personality": st.session_state.personality,
+                            "article_text": st.session_state.apply_article_text,
+                        },
+                        timeout=180,
+                    )
+                    apply_data = res.json()
+                except Exception as e:
+                    st.error(f"Could not reach API: {e}")
+                    st.stop()
+
+            # Clear so it doesn't auto-re-run on every interaction
+            st.session_state.apply_article_text = None
+
+            if apply_data.get("error"):
+                st.error(apply_data["error"])
+            else:
+                st.divider()
+
+                if apply_data.get("summary"):
+                    st.subheader("📖 What this article is about")
+                    st.write(apply_data["summary"])
+
+                if apply_data.get("takeaways_for_you"):
+                    st.subheader("✨ Takeaways for you")
+                    for t in apply_data["takeaways_for_you"]:
+                        st.markdown(f"- {t}")
+
+                if apply_data.get("where_this_might_be_hard"):
+                    st.subheader("⚠️ Where this might feel hard")
+                    for h in apply_data["where_this_might_be_hard"]:
+                        st.markdown(f"- {h}")
+
+                if apply_data.get("reflection_questions"):
+                    st.subheader("🤔 Questions to sit with")
+                    for q in apply_data["reflection_questions"]:
+                        st.markdown(f"- {q}")
+
+                if apply_data.get("caveat"):
+                    st.info(f"ℹ️ {apply_data['caveat']}")

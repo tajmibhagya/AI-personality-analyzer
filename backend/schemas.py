@@ -40,3 +40,16 @@ class RecommendResponse(BaseModel):
     medium: str
     recommendations: list[Recommendation] = Field(default_factory=list)
     error: Optional[str] = None
+    
+class ApplyToLifeRequest(BaseModel):
+    personality: dict[str, float]
+    article_text: str
+
+
+class ApplyToLifeResponse(BaseModel):
+    summary: Optional[str] = ""
+    takeaways_for_you: list[str] = Field(default_factory=list)
+    where_this_might_be_hard: list[str] = Field(default_factory=list)
+    reflection_questions: list[str] = Field(default_factory=list)
+    caveat: Optional[str] = ""
+    error: Optional[str] = None
