@@ -8,7 +8,7 @@ import { TextPreview } from "@/components/upload/TextPreview";
 import { ReflectionDisplay } from "@/components/upload/ReflectionDisplay";
 import { usePersonalityStore } from "@/lib/store/personality";
 import { useHydration } from "@/lib/store/useHydration";
-import { extractText, applyToLife } from "@/lib/api";
+import { extract, applyToLife } from "@/lib/api";
 import type { UploadFormSubmit } from "@/components/upload/UploadForm";
 import type { LifeReflection } from "@/lib/api";
 
@@ -32,7 +32,7 @@ export default function UploadPage() {
     if (input.mode === "text" && input.text) { payload.raw_text = input.text; label = "pasted text"; }
     else if (input.mode === "url" && input.url) { payload.url = input.url; label = "URL: " + input.url; }
     else if (input.mode === "pdf" && input.file) { payload.file = input.file; label = "PDF: " + input.file.name; }
-    const { data, error: apiError } = await extractText(payload);
+    const { data, error: apiError } = await extract(payload);
     if (apiError) { setError(apiError); setStage("error"); return; }
     if (data && data.text) { setExtractedText(data.text); setSourceLabel(label); setStage("preview"); }
     else { setError("Extraction returned no text."); setStage("error"); }
@@ -42,7 +42,7 @@ export default function UploadPage() {
     if (!personality) { setError("Personality not found. Analyze your writing first."); setStage("error"); return; }
     setStage("reflecting");
     setError(null);
-    const { data, error: apiError } = await applyToLife({ article_text: extractedText, personality });
+    const { data, error: apiError } = await applyToLife({ text: extractedText, personality });
     if (apiError) { setError(apiError); setStage("error"); return; }
     if (data) { setReflection(data); setStage("done"); }
     else { setError("Reflection returned no data."); setStage("error"); }
