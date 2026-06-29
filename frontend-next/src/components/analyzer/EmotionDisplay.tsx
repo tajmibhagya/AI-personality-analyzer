@@ -34,7 +34,7 @@ export function EmotionDisplay({ emotion }: EmotionDisplayProps) {
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-display text-[16px]">Emotional tone</h2>
         <span className="text-faint text-[12px] uppercase tracking-wider">
-          From your writing
+          According to you
         </span>
       </div>
 

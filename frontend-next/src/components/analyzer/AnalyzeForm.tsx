@@ -46,8 +46,8 @@ export function AnalyzeForm({ onSubmit, loading = false }: AnalyzeFormProps) {
       </div>
 
       <p className="text-muted text-[13px] mb-3 leading-relaxed">
-        A journal entry, blog post, long message, or any writing where you used
-        your natural voice. The more authentic, the better the analysis.
+        Your feelings right now,a journal entry, blog post, long message or any writing where you used
+        your natural feelings.
       </p>
 
       <textarea

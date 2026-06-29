@@ -2,6 +2,7 @@
 Life advisor: given an article + user's personality, generate reflective,
 personality-aware takeaways. Built with explicit safety framing.
 """
+import math
 from rag.generator import Generator
 
 
@@ -57,8 +58,13 @@ Generate personality-aware reflections in json."""
 MAX_ARTICLE_CHARS = 12000  # ~3000 tokens, leaves room for system prompt + output
 
 
+def _normalize(score: float) -> float:
+    """Sigmoid normalization: maps raw logits to [0, 1]."""
+    return 1.0 / (1.0 + math.exp(-score))
+
 def _format_personality(personality: dict) -> str:
-    sorted_traits = sorted(personality.items(), key=lambda kv: -kv[1])
+    normalized = {k: _normalize(v) for k, v in personality.items()}
+    sorted_traits = sorted(normalized.items(), key=lambda kv: -kv[1])
     lines = []
     for trait, score in sorted_traits:
         if score > 0.7:

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { TopNav } from "@/components/nav/TopNav";
-import { Container } from "@/components/layout/Container";
+import { AppLayout } from "@/components/layout/AppLayout";
+
 import { AnalyzeForm } from "@/components/analyzer/AnalyzeForm";
 import { PersonalityRadar } from "@/components/analyzer/PersonalityRadar";
 import { EmotionDisplay } from "@/components/analyzer/EmotionDisplay";
@@ -10,6 +10,7 @@ import { TraitBars } from "@/components/dashboard/TraitBars";
 import { usePersonalityStore } from "@/lib/store/personality";
 import { useHydration } from "@/lib/store/useHydration";
 import { analyze } from "@/lib/api";
+import { DownloadReportButton } from "@/components/pdf/DownloadReportButton";
 
 export default function AnalyzerPage() {
   const hydrated = useHydration();
@@ -57,10 +58,7 @@ export default function AnalyzerPage() {
   })() : null;
 
   return (
-    <>
-      <TopNav />
-      <main>
-        <Container className="py-8">
+    <AppLayout>
           <div className="mb-6 flex items-end justify-between flex-wrap gap-3">
             <div>
               <h1 className="font-display text-[32px] leading-tight">Analyzer</h1>
@@ -72,6 +70,7 @@ export default function AnalyzerPage() {
                   <span className="w-2 h-2 rounded-full bg-accent" />
                   Last analyzed {lastAnalyzedText}
                 </div>
+                <DownloadReportButton variant="secondary" />
                 <button type="button" onClick={() => clearAnalysis()} className="text-faint hover:text-text text-[12.5px] font-medium transition-colors">Reset</button>
               </div>
             ) : null}
@@ -116,19 +115,17 @@ export default function AnalyzerPage() {
               )}
 
               <div className="bg-surface border border-[color:var(--color-border-subtle)] rounded-[18px] p-5">
-                <h2 className="font-display text-[16px] mb-2">How it works</h2>
+                <h2 className="font-display text-[16px] mb-2">Let's Start Now</h2>
                 <ol className="text-muted text-[13.5px] space-y-2.5 list-decimal list-inside leading-relaxed">
-                  <li>Paste at least 200 characters of natural writing.</li>
-                  <li>A BERT model estimates Big Five traits.</li>
-                  <li>A separate model tags emotional tone.</li>
-                  <li>Results appear within a few seconds.</li>
+                  <li>Share a bit about yourself ! </li>
+                  <li>AI uncovers your personality traits and mood.</li>
+                  <li>Get instant insights tailored to you.</li>
+                  <li>Think of it as guidance, not a final judgment.</li>
                 </ol>
-                <p className="text-faint text-[12.5px] mt-4 leading-relaxed">Estimates are probabilistic, not diagnostic.</p>
+                <p className="text-faint text-[12.5px] mt-4 leading-relaxed">AI analyzes your personality and emotional tone.</p>
               </div>
             </div>
           </div>
-        </Container>
-      </main>
-    </>
+        </AppLayout>
   );
 }

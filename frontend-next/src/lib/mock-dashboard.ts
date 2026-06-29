@@ -1,5 +1,4 @@
 /**
- * Mock dashboard data — used by Phase N3 components until N4 wires to API.
  * Structure matches what the /analyze + /recommend endpoints will eventually return.
  */
 
