@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/lib/theme/ThemeContext";
+import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -35,9 +36,11 @@ export default function RootLayout({
       data-theme="dark"
       suppressHydrationWarning
     >
-      <body className="font-sans">
-        <ThemeProvider defaultTheme="dark">{children}</ThemeProvider>
-      </body>
+      <body>
+  <ThemeProvider> {children}
+    <Footer />
+  </ThemeProvider>
+</body>
     </html>
   );
 }

@@ -18,15 +18,8 @@ export function MediumSelector({ value, onChange }: MediumSelectorProps) {
         const info = mediumLabels[m];
         const isActive = value === m;
         return (
-          <button
-            key={m}
-            type="button"
-            onClick={() => onChange(m)}
-            className={cn("flex items-center gap-2 px-4 py-2 rounded-[11px] text-[13.5px] font-semibold transition-colors duration-150", isActive ? "bg-accent text-[#022]" : "bg-surface border border-[color:var(--color-border-subtle)] text-muted hover:bg-surface-2 hover:text-text")}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d={info.icon} />
-            </svg>
+          <button key={m} type="button" onClick={() => onChange(m)} className={cn("flex items-center gap-2 px-4 py-2 rounded-[11px] text-[13.5px] font-semibold transition-all duration-150 hover:scale-[1.04] hover:shadow-md", isActive ? "bg-accent text-[#022] hover:bg-accent/90 shadow-[0_0_12px_rgba(14,165,164,0.35)]" : "bg-surface border border-[color:var(--color-border-subtle)] text-muted hover:bg-surface-2 hover:text-text hover:border-[color:var(--color-accent)]/40")}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={info.icon} /></svg>
             {info.label}
           </button>
         );

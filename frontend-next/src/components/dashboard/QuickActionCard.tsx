@@ -1,59 +1,18 @@
-"use client";
-
-import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 type QuickActionCardProps = {
-  title: string;
+  icon: React.ReactNode;
+  label: string;
   subtitle: string;
-  iconPath: string;
-  href?: string;
-  onClick?: () => void;
+  href: string;
 };
 
-export function QuickActionCard({
-  title,
-  subtitle,
-  iconPath,
-  onClick,
-}: QuickActionCardProps) {
+export function QuickActionCard({ icon, label, subtitle, href }: QuickActionCardProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "group text-left",
-        "bg-surface border border-[color:var(--color-border-subtle)]",
-        "rounded-[14px] p-4",
-        "transition-all duration-150",
-        "hover:bg-surface-2 hover:-translate-y-0.5",
-        "active:translate-y-0",
-        "flex flex-col gap-3 min-h-[120px]"
-      )}
-    >
-      <div className="w-10 h-10 rounded-[10px] bg-accent-soft flex items-center justify-center flex-none">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-accent"
-        >
-          <path d={iconPath} />
-        </svg>
-      </div>
-
-      <div>
-        <div className="font-display text-[15px] font-bold leading-tight">
-          {title}
-        </div>
-        <div className="text-muted text-[12.5px] mt-1 leading-snug">
-          {subtitle}
-        </div>
-      </div>
-    </button>
+    <Link href={href} className="block bg-surface border border-[color:var(--color-border-subtle)] rounded-[16px] p-5 transition-all hover:-translate-y-0.5 hover:border-[color:var(--color-accent)]/40 hover:bg-surface-2 group">
+      <div className="w-10 h-10 rounded-[10px] bg-accent-soft flex items-center justify-center mb-3 text-accent">{icon}</div>
+      <div className="font-display text-[16px] mb-0.5 group-hover:text-accent transition-colors">{label}</div>
+      <div className="text-muted text-[12.5px]">{subtitle}</div>
+    </Link>
   );
 }

@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { TopNav } from "@/components/nav/TopNav";
-import { Container } from "@/components/layout/Container";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { MediumSelector } from "@/components/recommendations/MediumSelector";
 import { MoodSelector } from "@/components/recommendations/MoodSelector";
 import { RecommendationCard } from "@/components/recommendations/RecommendationCard";
@@ -49,13 +48,10 @@ export default function RecommendationsPage() {
   const handleChangeMood = (m: Mood) => setMood(m);
 
   return (
-    <>
-      <TopNav />
-      <main>
-        <Container className="py-8">
+    <AppLayout>
           <div className="mb-6">
             <h1 className="font-display text-[32px] leading-tight">Recommendations</h1>
-            <p className="text-muted text-[15px] mt-1.5">Books, films, music, and activities tuned to your personality profile.</p>
+            <p className="text-muted text-[15px] mt-1.5">Books, films, music, and activities matching to your personality profile.</p>
           </div>
 
           {hydrated && !personality ? (
@@ -129,8 +125,6 @@ export default function RecommendationsPage() {
               ) : null}
             </>
           ) : null}
-        </Container>
-      </main>
-    </>
+        </AppLayout>
   );
 }

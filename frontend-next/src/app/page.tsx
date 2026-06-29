@@ -1,12 +1,7 @@
 "use client";
 
-import { TopNav } from "@/components/nav/TopNav";
-import { Container } from "@/components/layout/Container";
-import { HeroStrip } from "@/components/dashboard/HeroStrip";
-import { QuickActions } from "@/components/dashboard/QuickActions";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { TraitInsightCard } from "@/components/dashboard/TraitInsightCard";
-import { RightColumn } from "@/components/dashboard/RightColumn";
-import { HealthCheck } from "@/components/HealthCheck";
 import { mockDashboard } from "@/lib/mock-dashboard";
 import { usePersonalityStore } from "@/lib/store/personality";
 import { useHydration } from "@/lib/store/useHydration";
@@ -57,62 +52,25 @@ function buildLiveTraits(p: Personality): TraitRow[] {
   return (Object.keys(desc) as Array<keyof Personality>).map((name) => {
     const score = p[name];
     const t = tier(score) as "high" | "moderate" | "low";
-    return {
-      name: name as string,
-      score: Math.round(score * 100),
-      colorVar: colors[name],
-      shortDescription: desc[name].short,
-      yourDescription: desc[name][t],
-    };
+    return { name: name as string, score: Math.round(score * 100), colorVar: colors[name], shortDescription: desc[name].short, yourDescription: desc[name][t] };
   });
 }
 
 export default function Home() {
   const hydrated = useHydration();
   const personality = usePersonalityStore((s) => s.personality);
-  const userName = usePersonalityStore((s) => s.userName);
 
   const traits = hydrated && personality ? buildLiveTraits(personality) : mockDashboard.traits;
-  const displayName = hydrated && personality ? userName : mockDashboard.userName;
-  const hasRealData = hydrated && personality !== null;
 
   return (
-    <>
-      <TopNav />
-      <main>
-        <Container className="py-6">
-          <HeroStrip userName={displayName} />
-
-          {!hasRealData && hydrated ? (
-            <div className="bg-accent-soft border border-[color:var(--color-accent)]/30 rounded-[14px] p-4 mb-5 flex items-center justify-between gap-3 flex-wrap">
-              <div>
-                <div className="font-semibold text-[14px] text-accent">Sample data shown</div>
-                <div className="text-muted text-[12.5px] mt-0.5">Analyze your writing to see your real Big Five profile here.</div>
-              </div>
-              <a href="/analyzer" className="px-4 py-2 bg-accent text-[#022] rounded-[10px] text-[13px] font-semibold hover:opacity-90 transition-opacity whitespace-nowrap">Analyze now</a>
-            </div>
-          ) : null}
-
-          <QuickActions />
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            <div className="lg:col-span-7 space-y-4">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="font-display text-[18px]">Your Big Five - explained</h2>
-                <a href="/analyzer" className="text-accent text-[13px] font-semibold hover:underline">See full breakdown</a>
-              </div>
-              {traits.map((trait) => (<TraitInsightCard key={trait.name} trait={trait} />))}
-            </div>
-            <div className="lg:col-span-5">
-              <RightColumn streakDays={mockDashboard.streakDays} recs={mockDashboard.recommendations} />
-            </div>
-          </div>
-
-          <div className="mt-8 pt-6 border-t border-[color:var(--color-border-subtle)] flex justify-center">
-            <HealthCheck />
-          </div>
-        </Container>
-      </main>
-    </>
+    <AppLayout>
+      <div className="mb-5 flex items-center justify-between flex-wrap gap-2">
+        <h2 className="font-display text-[22px]">Your Big Five - explained</h2>
+        <a href="/analyzer" className="text-accent text-[13px] font-semibold hover:underline">See full breakdown</a>
+      </div>
+      <div className="space-y-4">
+        {traits.map((trait) => (<TraitInsightCard key={trait.name} trait={trait} />))}
+      </div>
+    </AppLayout>
   );
 }
