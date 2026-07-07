@@ -88,11 +88,7 @@ def recommend_endpoint(req: RecommendRequest):
         mood=req.mood,
         exclude_ids=req.exclude_ids,
     )
-        if "recommendations" in result:
-        result["recommendations"] = [
-            enrich_recommendation(r, req.medium) for r in result["recommendations"]
-        ]
-        if "recommendations" in result:
+    if "recommendations" in result:
         result["recommendations"] = [
             enrich_recommendation(r, req.medium) for r in result["recommendations"]
         ]
