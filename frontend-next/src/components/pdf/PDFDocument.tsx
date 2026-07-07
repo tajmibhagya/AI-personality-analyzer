@@ -3,12 +3,30 @@
 import { Document, Page, Text, View, StyleSheet, Svg, Polygon, Line, Circle, Image } from "@react-pdf/renderer";
 import type { Personality, LifeReflection } from "@/lib/api";
 
+type RecommendationItem = {
+  title: string;
+  author_director?: string;
+  year?: number;
+  description: string;
+  why?: string;
+  traits?: string[];
+};
+
+type StoredRecommendations = {
+  books: RecommendationItem[];
+  films: RecommendationItem[];
+  music: RecommendationItem[];
+  activities: RecommendationItem[];
+  savedAt: number;
+};
+
 type PDFDocumentProps = {
   userName: string;
   personality: Personality | null;
   lastAnalyzedAt: number | null;
   reflection: LifeReflection | null;
   reflectionAt: number | null;
+  recommendations: StoredRecommendations | null;
 };
 
 const TRAIT_COLORS: Record<string, string> = {
@@ -43,20 +61,38 @@ const TRAIT_IMAGES: Record<string, string> = {
   Neuroticism: "/traits/neuroticism.jpeg",
 };
 
-function sigmoid(x: number) { return 1 / (1 + Math.exp(-x)); }
+const MEDIUM_COLORS: Record<string, string> = {
+  books: "#3b82f6",
+  films: "#a78bfa",
+  music: "#f59e0b",
+  activities: "#0ea5a4",
+};
 
+const MEDIUM_BG: Record<string, string> = {
+  books: "#eff6ff",
+  films: "#f5f3ff",
+  music: "#fffbeb",
+  activities: "#e6fafa",
+};
+
+const MEDIUM_ICONS: Record<string, string> = {
+  books: "📚",
+  films: "🎬",
+  music: "🎵",
+  activities: "⚡",
+};
+
+function sigmoid(x: number) { return 1 / (1 + Math.exp(-x)); }
 function normalize(p: Personality): Record<string, number> {
   return Object.fromEntries(Object.entries(p).map(([k, v]) => [k, sigmoid(v)]));
 }
-
 function levelLabel(score: number) {
   if (score >= 0.75) return "HIGH";
-  if (score >= 0.60) return "MODERATE-HIGH";
+  if (score >= 0.60) return "MOD-HIGH";
   if (score >= 0.45) return "AVERAGE";
-  if (score >= 0.25) return "MODERATE-LOW";
+  if (score >= 0.25) return "MOD-LOW";
   return "LOW";
 }
-
 function formatDate(ts: number | null): string {
   if (!ts) return "";
   return new Date(ts).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
@@ -72,14 +108,11 @@ const s = StyleSheet.create({
   coverName: { fontSize: 24, fontFamily: "Helvetica-Bold", color: "#0ea5a4", marginBottom: 8 },
   coverDate: { fontSize: 11, color: "#4b5563" },
   coverAccent: { position: "absolute", bottom: 0, left: 0, right: 0, height: 4, backgroundColor: "#0ea5a4" },
-
   hdr: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderBottomWidth: 1, borderBottomColor: "#e5e7eb", paddingBottom: 8, marginBottom: 20 },
   hdrBrand: { fontSize: 9, fontFamily: "Helvetica-Bold", color: "#0ea5a4", letterSpacing: 2 },
   hdrPage: { fontSize: 9, color: "#9ca3af" },
-
   sectionTitle: { fontSize: 24, fontFamily: "Helvetica-Bold", marginBottom: 4 },
   sectionSub: { fontSize: 11, color: "#6b7280", marginBottom: 20 },
-
   traitRow: { flexDirection: "row", alignItems: "stretch", marginBottom: 10, borderRadius: 8, overflow: "hidden", minHeight: 72 },
   traitLeft: { flex: 1, padding: 10, justifyContent: "center" },
   traitName: { fontSize: 13, fontFamily: "Helvetica-Bold", marginBottom: 2 },
@@ -89,13 +122,8 @@ const s = StyleSheet.create({
   traitScore: { fontSize: 9, fontFamily: "Helvetica-Bold" },
   traitImg: { width: 72, height: 72 },
   traitBadge: { fontSize: 7, fontFamily: "Helvetica-Bold", letterSpacing: 1, paddingHorizontal: 5, paddingVertical: 2, borderRadius: 4, marginBottom: 4, alignSelf: "flex-start" },
-
   radarWrap: { alignItems: "center", marginBottom: 6 },
   radarLabel: { fontSize: 8, color: "#6b7280", marginTop: 4, textAlign: "center" },
-
-  axisLabels: { position: "relative", width: 280, height: 40 },
-  axisLabel: { position: "absolute", fontSize: 8, fontFamily: "Helvetica-Bold", textAlign: "center" },
-
   reflSection: { marginBottom: 16 },
   reflHeading: { fontSize: 12, fontFamily: "Helvetica-Bold", marginBottom: 8, paddingLeft: 8, borderLeftWidth: 3 },
   reflBody: { fontSize: 11, lineHeight: 1.65, color: "#374151" },
@@ -110,6 +138,16 @@ const s = StyleSheet.create({
   emptyTxt: { fontSize: 11, color: "#9ca3af", textAlign: "center" },
   footer: { position: "absolute", bottom: 20, left: 44, right: 44, flexDirection: "row", justifyContent: "space-between", borderTopWidth: 1, borderTopColor: "#e5e7eb", paddingTop: 8 },
   footerTxt: { fontSize: 8, color: "#9ca3af" },
+  mediumSection: { marginBottom: 16 },
+  mediumHeader: { flexDirection: "row", alignItems: "center", marginBottom: 8, paddingBottom: 4, borderBottomWidth: 1 },
+  mediumTitle: { fontSize: 14, fontFamily: "Helvetica-Bold" },
+  recCard: { borderRadius: 8, padding: 10, marginBottom: 6 },
+  recTitle: { fontSize: 12, fontFamily: "Helvetica-Bold", marginBottom: 2 },
+  recMeta: { fontSize: 9, color: "#6b7280", marginBottom: 4 },
+  recDesc: { fontSize: 10, color: "#374151", lineHeight: 1.5 },
+  recWhy: { fontSize: 9, color: "#0ea5a4", marginTop: 4, fontStyle: "italic" },
+  recTraits: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 4 },
+  recTrait: { fontSize: 7, fontFamily: "Helvetica-Bold", paddingHorizontal: 5, paddingVertical: 2, borderRadius: 4, backgroundColor: "#e5e7eb", color: "#374151" },
 });
 
 function PDFRadar({ norm }: { norm: Record<string, number> }) {
@@ -119,31 +157,18 @@ function PDFRadar({ norm }: { norm: Record<string, number> }) {
   const cy = size / 2;
   const maxR = 88;
   const angles = traits.map((_, i) => -Math.PI / 2 + (i * 2 * Math.PI) / 5);
-
   const rings = [0.25, 0.5, 0.75, 1].map((f) =>
     angles.map((a) => `${(cx + Math.cos(a) * f * maxR).toFixed(1)},${(cy + Math.sin(a) * f * maxR).toFixed(1)}`).join(" ")
   );
-
-  const polyPoints = angles
-    .map((a, i) => {
-      const r = (norm[traits[i]] || 0) * maxR;
-      return `${(cx + Math.cos(a) * r).toFixed(1)},${(cy + Math.sin(a) * r).toFixed(1)}`;
-    })
-    .join(" ");
-
+  const polyPoints = angles.map((a, i) => {
+    const r = (norm[traits[i]] || 0) * maxR;
+    return `${(cx + Math.cos(a) * r).toFixed(1)},${(cy + Math.sin(a) * r).toFixed(1)}`;
+  }).join(" ");
   const dotPositions = angles.map((a, i) => ({
     x: cx + Math.cos(a) * (norm[traits[i]] || 0) * maxR,
     y: cy + Math.sin(a) * (norm[traits[i]] || 0) * maxR,
     color: TRAIT_COLORS[traits[i]],
   }));
-
-  const labelPositions = angles.map((a, i) => ({
-    x: cx + Math.cos(a) * (maxR + 16),
-    y: cy + Math.sin(a) * (maxR + 16),
-    label: traits[i],
-    color: TRAIT_COLORS[traits[i]],
-  }));
-
   return (
     <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       {rings.map((pts, i) => <Polygon key={i} points={pts} fill="none" stroke="#e5e7eb" strokeWidth={0.6} />)}
@@ -152,21 +177,17 @@ function PDFRadar({ norm }: { norm: Record<string, number> }) {
       ))}
       <Polygon points={polyPoints} fill="#0ea5a4" fillOpacity={0.25} stroke="#0ea5a4" strokeWidth={1.8} />
       {dotPositions.map((d, i) => <Circle key={i} cx={d.x} cy={d.y} r={3} fill={d.color} />)}
-      {labelPositions.map((l, i) => (
-        <Circle key={"bg" + i} cx={l.x} cy={l.y} r={9} fill={TRAIT_COLORS[traits[i]]} fillOpacity={0.15} />
-      ))}
     </Svg>
   );
 }
 
-function RadarAxisLabels({ norm }: { norm: Record<string, number> }) {
+function RadarWithLabels({ norm }: { norm: Record<string, number> }) {
   const traits = ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"];
   const size = 240;
   const cx = size / 2;
   const cy = size / 2;
   const maxR = 88;
   const angles = traits.map((_, i) => -Math.PI / 2 + (i * 2 * Math.PI) / 5);
-
   return (
     <View style={{ width: size, position: "relative", height: size, marginBottom: 4 }}>
       <PDFRadar norm={norm} />
@@ -174,16 +195,7 @@ function RadarAxisLabels({ norm }: { norm: Record<string, number> }) {
         const lx = cx + Math.cos(a) * (maxR + 22);
         const ly = cy + Math.sin(a) * (maxR + 22);
         return (
-          <Text key={i} style={{
-            position: "absolute",
-            left: lx - 28,
-            top: ly - 6,
-            width: 56,
-            fontSize: 7,
-            fontFamily: "Helvetica-Bold",
-            color: TRAIT_COLORS[traits[i]],
-            textAlign: "center",
-          }}>
+          <Text key={i} style={{ position: "absolute", left: lx - 28, top: ly - 6, width: 56, fontSize: 7, fontFamily: "Helvetica-Bold", color: TRAIT_COLORS[traits[i]], textAlign: "center" }}>
             {traits[i]}
           </Text>
         );
@@ -192,13 +204,53 @@ function RadarAxisLabels({ norm }: { norm: Record<string, number> }) {
   );
 }
 
-export function PDFDocument({ userName, personality, lastAnalyzedAt, reflection, reflectionAt }: PDFDocumentProps) {
+function MediumSection({ medium, items }: { medium: string; items: RecommendationItem[] }) {
+  const color = MEDIUM_COLORS[medium];
+  const bg = MEDIUM_BG[medium];
+  const icon = MEDIUM_ICONS[medium];
+  const label = medium.charAt(0).toUpperCase() + medium.slice(1);
+  if (!items || items.length === 0) return null;
+  return (
+    <View style={s.mediumSection}>
+      <View style={[s.mediumHeader, { borderBottomColor: color }]}>
+        <Text style={[s.mediumTitle, { color }]}>{icon}  {label}</Text>
+      </View>
+      {items.slice(0, 3).map((item, i) => (
+        <View key={i} style={[s.recCard, { backgroundColor: bg }]}>
+          <Text style={[s.recTitle, { color }]}>{item.title}</Text>
+          {(item.author_director || item.year) ? (
+            <Text style={s.recMeta}>
+              {[item.author_director, item.year ? String(item.year) : null].filter(Boolean).join(" · ")}
+            </Text>
+          ) : null}
+          <Text style={s.recDesc}>{item.description}</Text>
+          {item.why ? <Text style={s.recWhy}>{item.why}</Text> : null}
+          {item.traits && item.traits.length > 0 ? (
+            <View style={s.recTraits}>
+              {item.traits.slice(0, 3).map((t, j) => (
+                <Text key={j} style={s.recTrait}>{t}</Text>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+export function PDFDocument({ userName, personality, lastAnalyzedAt, reflection, reflectionAt, recommendations }: PDFDocumentProps) {
   const norm = personality ? normalize(personality) : null;
   const traits = ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"];
+  const hasAnyRecs = recommendations && (
+    recommendations.books.length > 0 ||
+    recommendations.films.length > 0 ||
+    recommendations.music.length > 0 ||
+    recommendations.activities.length > 0
+  );
 
   return (
     <Document>
-      {/* COVER */}
+      {/* PAGE 1 — COVER */}
       <Page size="A4" style={s.page}>
         <View style={s.coverBg} />
         <View style={s.coverWrap}>
@@ -215,7 +267,7 @@ export function PDFDocument({ userName, personality, lastAnalyzedAt, reflection,
         </View>
       </Page>
 
-      {/* BIG FIVE */}
+      {/* PAGE 2 — BIG FIVE */}
       <Page size="A4" style={s.page}>
         <View style={s.hdr}>
           <Text style={s.hdrBrand}>MINDPROFILE AI</Text>
@@ -223,14 +275,12 @@ export function PDFDocument({ userName, personality, lastAnalyzedAt, reflection,
         </View>
         <Text style={s.sectionTitle}>Your Big Five</Text>
         <Text style={s.sectionSub}>{norm ? `Analyzed ${formatDate(lastAnalyzedAt)}` : "Not yet analyzed"}</Text>
-
         {norm ? (
           <>
             <View style={s.radarWrap}>
-              <RadarAxisLabels norm={norm} />
+              <RadarWithLabels norm={norm} />
               <Text style={s.radarLabel}>The further from center, the higher the trait</Text>
             </View>
-
             <View style={{ marginTop: 12 }}>
               {traits.map((trait) => {
                 const score = norm[trait] || 0;
@@ -260,14 +310,13 @@ export function PDFDocument({ userName, personality, lastAnalyzedAt, reflection,
             <Text style={s.emptyTxt}>No personality data yet.{"\n"}Go to the Analyzer and paste your writing.</Text>
           </View>
         )}
-
         <View style={s.footer}>
           <Text style={s.footerTxt}>MindProfile AI</Text>
           <Text style={s.footerTxt}>Page 2</Text>
         </View>
       </Page>
 
-      {/* REFLECTION */}
+      {/* PAGE 3 — REFLECTION */}
       <Page size="A4" style={s.page}>
         <View style={s.hdr}>
           <Text style={s.hdrBrand}>MINDPROFILE AI</Text>
@@ -275,7 +324,6 @@ export function PDFDocument({ userName, personality, lastAnalyzedAt, reflection,
         </View>
         <Text style={s.sectionTitle}>Reflection</Text>
         <Text style={s.sectionSub}>{reflection ? `Generated ${formatDate(reflectionAt)}` : "No reflection yet"}</Text>
-
         {reflection ? (
           <>
             {reflection.summary ? (
@@ -284,7 +332,6 @@ export function PDFDocument({ userName, personality, lastAnalyzedAt, reflection,
                 <Text style={s.reflBody}>{reflection.summary}</Text>
               </View>
             ) : null}
-
             {reflection.takeaways_for_you && reflection.takeaways_for_you.length > 0 ? (
               <View style={s.reflSection}>
                 <Text style={[s.reflHeading, { borderLeftColor: "#22c55e", color: "#16a34a" }]}>Takeaways for you</Text>
@@ -296,7 +343,6 @@ export function PDFDocument({ userName, personality, lastAnalyzedAt, reflection,
                 ))}
               </View>
             ) : null}
-
             {reflection.where_this_might_be_hard && reflection.where_this_might_be_hard.length > 0 ? (
               <View style={s.reflSection}>
                 <Text style={[s.reflHeading, { borderLeftColor: "#f59e0b", color: "#d97706" }]}>Where this might be hard</Text>
@@ -308,7 +354,6 @@ export function PDFDocument({ userName, personality, lastAnalyzedAt, reflection,
                 ))}
               </View>
             ) : null}
-
             {reflection.reflection_questions && reflection.reflection_questions.length > 0 ? (
               <View style={s.reflSection}>
                 <Text style={[s.reflHeading, { borderLeftColor: "#a78bfa", color: "#7c3aed" }]}>Reflection questions</Text>
@@ -317,7 +362,6 @@ export function PDFDocument({ userName, personality, lastAnalyzedAt, reflection,
                 ))}
               </View>
             ) : null}
-
             {reflection.caveat ? (
               <View style={s.caveat}>
                 <Text style={s.caveatLabel}>NOTE</Text>
@@ -330,10 +374,37 @@ export function PDFDocument({ userName, personality, lastAnalyzedAt, reflection,
             <Text style={s.emptyTxt}>No reflection yet.{"\n"}Go to Upload CV and apply an article to your life.</Text>
           </View>
         )}
-
         <View style={s.footer}>
           <Text style={s.footerTxt}>MindProfile AI</Text>
           <Text style={s.footerTxt}>Page 3</Text>
+        </View>
+      </Page>
+
+      {/* PAGE 4 — RECOMMENDATIONS */}
+      <Page size="A4" style={s.page}>
+        <View style={s.hdr}>
+          <Text style={s.hdrBrand}>MINDPROFILE AI</Text>
+          <Text style={s.hdrPage}>Your Recommendations</Text>
+        </View>
+        <Text style={s.sectionTitle}>Picked for you</Text>
+        <Text style={s.sectionSub}>
+          {hasAnyRecs ? `Books, films, music, and activities matched to your Big Five profile.` : "No recommendations saved yet."}
+        </Text>
+        {hasAnyRecs ? (
+          <>
+            <MediumSection medium="books" items={recommendations!.books} />
+            <MediumSection medium="films" items={recommendations!.films} />
+            <MediumSection medium="music" items={recommendations!.music} />
+            <MediumSection medium="activities" items={recommendations!.activities} />
+          </>
+        ) : (
+          <View style={s.emptyBox}>
+            <Text style={s.emptyTxt}>Visit the Recommendations page first.{"\n"}Browse books, films, music, and activities.{"\n"}They will appear here automatically.</Text>
+          </View>
+        )}
+        <View style={s.footer}>
+          <Text style={s.footerTxt}>MindProfile AI</Text>
+          <Text style={s.footerTxt}>Page 4</Text>
         </View>
       </Page>
     </Document>

@@ -18,6 +18,7 @@ export function DownloadReportButton({ variant = "primary", className = "" }: Do
   const reflection = usePersonalityStore((s) => s.lastReflection);
   const reflectionAt = usePersonalityStore((s) => s.lastReflectionAt);
   const userName = usePersonalityStore((s) => s.userName);
+  const recommendations = usePersonalityStore((s) => s.lastRecommendations);
 
   const [generating, setGenerating] = useState(false);
 
@@ -32,6 +33,7 @@ export function DownloadReportButton({ variant = "primary", className = "" }: Do
           lastAnalyzedAt={lastAnalyzedAt}
           reflection={reflection}
           reflectionAt={reflectionAt}
+          recommendations={recommendations}
         />
       ).toBlob();
 
