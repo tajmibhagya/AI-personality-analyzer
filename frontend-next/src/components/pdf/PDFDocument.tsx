@@ -76,10 +76,10 @@ const MEDIUM_BG: Record<string, string> = {
 };
 
 const MEDIUM_ICONS: Record<string, string> = {
-  books: "📚",
-  films: "🎬",
-  music: "🎵",
-  activities: "⚡",
+  books: "Books",
+  films: "Films",
+  music: "Music",
+  activities: "Activities",
 };
 
 function sigmoid(x: number) { return 1 / (1 + Math.exp(-x)); }
@@ -213,7 +213,7 @@ function MediumSection({ medium, items }: { medium: string; items: Recommendatio
   return (
     <View style={s.mediumSection}>
       <View style={[s.mediumHeader, { borderBottomColor: color }]}>
-        <Text style={[s.mediumTitle, { color }]}>{icon}  {label}</Text>
+        <Text style={[s.mediumTitle, { color }]}>{label}</Text>
       </View>
       {items.slice(0, 3).map((item, i) => (
         <View key={i} style={[s.recCard, { backgroundColor: bg }]}>
@@ -257,7 +257,7 @@ export function PDFDocument({ userName, personality, lastAnalyzedAt, reflection,
           <Text style={s.coverBrand}>MINDPROFILE AI</Text>
           <Text style={s.coverTitle}>Personality{"\n"}Report</Text>
           <Text style={s.coverSub}>Big Five analysis from your writing</Text>
-          <Text style={s.coverName}>For {userName}</Text>
+          <Text style={s.coverName}>Work by Tajmi Bhagya Senevirathna</Text>
           <Text style={s.coverDate}>Generated {formatDate(Date.now())}</Text>
         </View>
         <View style={s.coverAccent} />

@@ -6,8 +6,8 @@ export type TraitRow = {
     name: string;
     score: number;
     colorVar: string;
-    shortDescription: string;  // one-line label: what high vs low looks like
-    yourDescription: string;   // personalized: what their score means
+    shortDescription?: string;  // one-line label: what high vs low looks like
+    yourDescription?: string;   // personalized: what their score means
   };
   
 export type Recommendation = {

@@ -62,7 +62,7 @@ export default function AnalyzerPage() {
           <div className="mb-6 flex items-end justify-between flex-wrap gap-3">
             <div>
               <h1 className="font-display text-[32px] leading-tight">Analyzer</h1>
-              <p className="text-muted text-[15px] mt-1.5">Paste your writing below. We analyze Big Five personality and emotional tone.</p>
+              <p className="text-muted text-[15px] mt-1.5">Share something you have written. We will map your personality and emotional tone from it.</p>
             </div>
             {hydrated && lastAnalyzedText ? (
               <div className="flex items-center gap-3">

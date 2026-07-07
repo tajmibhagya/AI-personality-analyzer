@@ -159,8 +159,8 @@ export default function UploadPage() {
             {stage === "reflecting" ? (
               <div className="bg-surface border border-[color:var(--color-border-subtle)] rounded-[18px] p-8 text-center">
                 <div className="w-10 h-10 rounded-full border-2 border-accent border-t-transparent animate-spin mx-auto mb-4" />
-                <div className="font-display text-[16px] mb-1">Reflecting through your personality...</div>
-                <p className="text-muted text-[13px]">The LLM is reading this content through your Big Five profile. Takes 10-20 seconds.</p>
+                <div className="font-display text-[16px] mb-1">Shaping insights around your personality...</div>
+                <p className="text-muted text-[13px]">Reading your content through your personality profile. This takes around 10 to 20 seconds.</p>
               </div>
             ) : null}
 
@@ -248,14 +248,14 @@ export default function UploadPage() {
 
           <div className="lg:col-span-5">
             <div className="bg-surface border border-[color:var(--color-border-subtle)] rounded-[18px] p-5 lg:sticky lg:top-24">
-              <h2 className="font-display text-[16px] mb-2">How this is different</h2>
-              <p className="text-muted text-[13.5px] leading-relaxed mb-4">Generic advice tells you what worked for someone average. This tells you what is likely to work or be hard <span className="text-text font-semibold">for you</span> based on your actual personality scores.</p>
+              <h2 className="font-display text-[16px] mb-2">Why this works differently</h2>
+              <p className="text-muted text-[13.5px] leading-relaxed mb-4">Most advice is written for an average person. This is shaped around your actual personality scores, so what you read is relevant to you specifically.</p>
               <div className="space-y-3 text-[13px]">
-                <div className="flex gap-2.5"><div className="w-6 h-6 rounded-full bg-accent-soft text-accent flex items-center justify-center text-[11px] font-bold flex-none">1</div><div className="text-muted leading-relaxed pt-0.5">We extract clean text from your input.</div></div>
-                <div className="flex gap-2.5"><div className="w-6 h-6 rounded-full bg-accent-soft text-accent flex items-center justify-center text-[11px] font-bold flex-none">2</div><div className="text-muted leading-relaxed pt-0.5">An LLM reads it through your Big Five profile.</div></div>
-                <div className="flex gap-2.5"><div className="w-6 h-6 rounded-full bg-accent-soft text-accent flex items-center justify-center text-[11px] font-bold flex-none">3</div><div className="text-muted leading-relaxed pt-0.5">You get takeaways, blind spots, and reflection prompts tuned to your traits.</div></div>
+                <div className="flex gap-2.5"><div className="w-6 h-6 rounded-full bg-accent-soft text-accent flex items-center justify-center text-[11px] font-bold flex-none">1</div><div className="text-muted leading-relaxed pt-0.5">We pull the key content from what you share.</div></div>
+                <div className="flex gap-2.5"><div className="w-6 h-6 rounded-full bg-accent-soft text-accent flex items-center justify-center text-[11px] font-bold flex-none">2</div><div className="text-muted leading-relaxed pt-0.5">We read it through your personality profile.</div></div>
+                <div className="flex gap-2.5"><div className="w-6 h-6 rounded-full bg-accent-soft text-accent flex items-center justify-center text-[11px] font-bold flex-none">3</div><div className="text-muted leading-relaxed pt-0.5">You get insights, honest blind spots, and questions shaped around who you are.</div></div>
               </div>
-              <p className="text-faint text-[11.5px] mt-5 leading-relaxed">Not a therapist or career coach. A reflection tool that knows your personality.</p>
+              <p className="text-faint text-[11.5px] mt-5 leading-relaxed">Not a therapist or career coach. A thinking partner that knows your personality.</p>
             </div>
           </div>
         </div>
