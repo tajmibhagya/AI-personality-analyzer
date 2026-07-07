@@ -25,9 +25,9 @@ def enrich_recommendation(rec: dict, medium: str) -> dict:
     """Add real title to recommendation if missing or is an ID."""
     title = rec.get("title", "")
     metadata = rec.get("metadata", {})
-    if title and not title.startswith(f"{medium}_"):
-        return rec
-    if medium == "films":
+    needs_fix = not title or title.startswith(f"{medium}_") or len(title) > 80
+
+    if medium == "films" and needs_fix:
         tmdb_id = metadata.get("tmdb_id")
         if tmdb_id:
             real_title = resolve_film_title(int(tmdb_id))
@@ -36,4 +36,19 @@ def enrich_recommendation(rec: dict, medium: str) -> dict:
                 rec["title"] = real_title
                 rec["metadata"] = dict(metadata)
                 rec["metadata"]["title"] = real_title
+                return rec
+
+    if medium == "music" and needs_fix:
+        key = metadata.get("key", "")
+        if "|" in str(key):
+            parts = str(key).split("|")
+            track = parts[0].strip()
+            artist = parts[1].strip() if len(parts) > 1 else ""
+            real_title = f"{track} — {artist}" if artist else track
+            rec = dict(rec)
+            rec["title"] = real_title
+            rec["metadata"] = dict(metadata)
+            rec["metadata"]["title"] = real_title
+            return rec
+
     return rec
