@@ -98,7 +98,7 @@ export function RecommendationCard({ rec, index }: RecommendationCardProps) {
               ))}
               <a href={platformUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-accent text-[12.5px] font-semibold hover:underline mb-3">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              Search on Google
+              Find it →
             </a>
           {sourceUrl ? (
                 <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="block mt-3 text-accent text-[12.5px] font-semibold hover:underline">View source</a>
