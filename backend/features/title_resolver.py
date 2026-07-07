@@ -25,7 +25,7 @@ def enrich_recommendation(rec: dict, medium: str) -> dict:
     """Add real title to recommendation if missing or is an ID."""
     title = rec.get("title", "")
     metadata = rec.get("metadata", {})
-    needs_fix = not title or title.startswith(f"{medium}_") or len(title) > 80
+    needs_fix = not title or title.startswith(f"{medium}_") or len(title) > 60 or title[0].islower()
 
     if medium == "films" and needs_fix:
         tmdb_id = metadata.get("tmdb_id")
