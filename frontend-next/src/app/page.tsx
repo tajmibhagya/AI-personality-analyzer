@@ -8,6 +8,8 @@ import { useHydration } from "@/lib/store/useHydration";
 import type { TraitRow } from "@/lib/mock-dashboard";
 import type { Personality } from "@/lib/api";
 
+function sigmoid(x: number) { return 1 / (1 + Math.exp(-x)); }
+
 function buildLiveTraits(p: Personality): TraitRow[] {
   const desc: Record<string, { short: string; high: string; moderate: string; low: string }> = {
     Openness: {
@@ -50,7 +52,8 @@ function buildLiveTraits(p: Personality): TraitRow[] {
   };
   const tier = (s: number) => (s >= 0.6 ? "high" : s >= 0.4 ? "moderate" : "low");
   return (Object.keys(desc) as Array<keyof Personality>).map((name) => {
-    const score = p[name];
+    const raw = p[name];
+    const score = sigmoid(raw);
     const t = tier(score) as "high" | "moderate" | "low";
     return { name: name as string, score: Math.round(score * 100), colorVar: colors[name], shortDescription: desc[name].short, yourDescription: desc[name][t] };
   });
