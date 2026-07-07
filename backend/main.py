@@ -60,7 +60,7 @@ app.add_middleware(
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "models_loaded": list(models.keys())}
+    return {"status": "ok", "models_loaded": list(models.keys()), "resolver_version": "v3-music-fix"}
 
 
 @app.post("/analyze", response_model=AnalyzeResponse)
