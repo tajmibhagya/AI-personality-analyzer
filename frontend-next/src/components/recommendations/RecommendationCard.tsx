@@ -56,18 +56,16 @@ export function RecommendationCard({ rec, index }: RecommendationCardProps) {
   return (
     <div className="bg-surface border border-[color:var(--color-border-subtle)] rounded-[18px] p-5 transition-all hover:-translate-y-0.5 hover:border-[color:var(--color-accent)]/30 mp-animate-in" style={{ animationDelay: index * 80 + "ms" }}>
       <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-start gap-3 flex-1 min-w-0">
-          <div className="w-11 h-11 rounded-[11px] bg-accent-soft flex items-center justify-center flex-none">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
-              <path d="M12 2l2.2 5.6L20 9l-5 4.3L16.5 20 12 16.5 7.5 20 9 13.3 4 9l5.8-1.4Z" />
-            </svg>
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="font-display text-[17px] leading-tight">{rec.title}</h3>
-            {subtitle ? <div className="text-muted text-[12.5px] mt-1">{subtitle}</div> : null}
-          </div>
+        <div className="w-11 h-11 rounded-[11px] bg-accent-soft flex items-center justify-center flex-none">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
+            <path d="M12 2l2.2 5.6L20 9l-5 4.3L16.5 20 12 16.5 7.5 20 9 13.3 4 9l5.8-1.4Z" />
+          </svg>
         </div>
         <span className={cn("text-[10.5px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-[7px] flex-none", badge.textColor, badge.bg)}>{badge.label}</span>
+      </div>
+      <div className="mb-3">
+        <p className="text-text text-[15px] font-normal leading-snug">{rec.title}</p>
+        {subtitle ? <p className="text-muted text-[12.5px] mt-0.5">{subtitle}</p> : null}
       </div>
 
       <p className="text-text text-[13.5px] leading-relaxed mb-3">{rec.why}</p>
