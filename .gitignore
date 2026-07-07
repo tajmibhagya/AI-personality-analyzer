@@ -21,3 +21,7 @@ env/
 .idea/
 EOF.venv310/
 frontend/.streamlit/secrets.toml
+.venv/
+**/.venv/
+*.pyc
+__pycache__/
