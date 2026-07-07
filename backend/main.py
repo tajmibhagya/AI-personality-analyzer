@@ -11,6 +11,7 @@ from schemas import RecommendRequest, RecommendResponse
 from rag.retriever import warm_up
 
 from features.life_advisor import apply_to_life
+from features.title_resolver import enrich_recommendation
 from schemas import ApplyToLifeRequest, ApplyToLifeResponse
 
 from fastapi import UploadFile, File, Form
@@ -87,6 +88,14 @@ def recommend_endpoint(req: RecommendRequest):
         mood=req.mood,
         exclude_ids=req.exclude_ids,
     )
+        if "recommendations" in result:
+        result["recommendations"] = [
+            enrich_recommendation(r, req.medium) for r in result["recommendations"]
+        ]
+        if "recommendations" in result:
+        result["recommendations"] = [
+            enrich_recommendation(r, req.medium) for r in result["recommendations"]
+        ]
     return RecommendResponse(**result)
 
 @app.post("/extract")
