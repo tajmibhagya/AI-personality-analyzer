@@ -27,6 +27,7 @@ RUN python -c "from transformers import AutoTokenizer, AutoModelForSequenceClass
 RUN python -c "from sentence_transformers import SentenceTransformer; \
     SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')"
 
+# build indexes - cache bust 2
 RUN python data/recommender/build_indexes.py
 
 EXPOSE 7860
