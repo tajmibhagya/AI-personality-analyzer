@@ -1,3 +1,18 @@
+import httpx
+from unittest.mock import patch as _patch
+
+# Fix groq/openai proxies incompatibility
+_original_init = None
+try:
+    import openai
+    _original_init = openai.OpenAI.__init__
+    def _patched_init(self, *args, **kwargs):
+        kwargs.pop("proxies", None)
+        _original_init(self, *args, **kwargs)
+    openai.OpenAI.__init__ = _patched_init
+except Exception:
+    pass
+
 """
 Generator: takes a prompt + retrieved chunks, returns structured JSON.
 
@@ -32,6 +47,7 @@ class Generator:
             cls._instance.client = OpenAI(
                 api_key=api_key,
                 base_url="https://api.groq.com/openai/v1",
+                http_client=httpx.Client(),
             )
             cls._instance.model = model
             print(f"[Generator] Ready with Groq + {model}")
