@@ -64,7 +64,7 @@ export function RecommendationCard({ rec, index }: RecommendationCardProps) {
         <span className={cn("text-[10.5px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-[7px] flex-none", badge.textColor, badge.bg)}>{badge.label}</span>
       </div>
       <div className="mb-3">
-        <p className="text-text text-[15px] font-normal leading-snug">{rec.title}</p>
+        <p className="font-display text-[17px] leading-tight">{rec.title}</p>
         {subtitle ? <p className="text-muted text-[12.5px] mt-0.5">{subtitle}</p> : null}
       </div>
 
