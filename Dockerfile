@@ -32,3 +32,4 @@ RUN python data/recommender/build_indexes.py
 
 EXPOSE 7860
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
+# restart Tue Jul  7 21:13:31 +0530 2026
