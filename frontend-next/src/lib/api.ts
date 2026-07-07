@@ -44,14 +44,16 @@ export type RecommendResponse = {
   error?: string | null;
 };
 
-export type ApplyToLifeResponse = {
-  summary?: string;
-  takeaways_for_you?: string[];
-  where_this_might_be_hard?: string[];
-  reflection_questions?: string[];
-  caveat?: string;
+export type LifeReflection = {
+  summary: string;
+  takeaways_for_you: string[];
+  where_this_might_be_hard: string[];
+  reflection_questions: string[];
+  caveat: string;
   error?: string | null;
 };
+
+export type ApplyToLifeResponse = LifeReflection;
 
 export type ExtractResponse = {
   text?: string;

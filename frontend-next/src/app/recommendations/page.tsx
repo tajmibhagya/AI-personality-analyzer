@@ -37,11 +37,13 @@ export default function RecommendationsPage() {
       setRecs(data.recommendations);
       setSeenIds((prev) => Array.from(new Set([...prev, ...data.recommendations.map((r) => r.id)])));
       const prev = lastRecsRef.current;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const asItems = (arr: any[]) => arr as any;
       saveRecommendations({
-        books: medium === "books" ? data.recommendations : (prev?.books || []),
-        films: medium === "films" ? data.recommendations : (prev?.films || []),
-        music: medium === "music" ? data.recommendations : (prev?.music || []),
-        activities: medium === "activities" ? data.recommendations : (prev?.activities || []),
+        books: medium === "books" ? asItems(data.recommendations) : (prev?.books || []),
+        films: medium === "films" ? asItems(data.recommendations) : (prev?.films || []),
+        music: medium === "music" ? asItems(data.recommendations) : (prev?.music || []),
+        activities: medium === "activities" ? asItems(data.recommendations) : (prev?.activities || []),
         savedAt: Date.now(),
       });
     }
