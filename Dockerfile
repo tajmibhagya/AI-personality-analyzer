@@ -34,3 +34,4 @@ EXPOSE 7860
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
 # restart Tue Jul  7 21:13:31 +0530 2026
 # rebuild-trigger: 1783440012
+# force-rebuild-1783449080
