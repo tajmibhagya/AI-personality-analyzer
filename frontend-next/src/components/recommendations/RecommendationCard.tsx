@@ -51,7 +51,7 @@ export function RecommendationCard({ rec, index }: RecommendationCardProps) {
   const details = detailsFor(rec.metadata ?? {});
   const sourceUrl = typeof rec.metadata?.source_url === "string" ? rec.metadata.source_url as string : null;
   const searchQuery = encodeURIComponent([rec.title, rec.metadata?.author || rec.metadata?.director || rec.metadata?.artist || ""].filter(Boolean).join(" "));
-  const googleUrl = `https://www.google.com/search?q=${searchQuery}`;
+  const platformUrl = (rec.metadata?.platform_url as string) || `https://www.google.com/search?q=${searchQuery}`;
 
   return (
     <div className="bg-surface border border-[color:var(--color-border-subtle)] rounded-[18px] p-5 transition-all hover:-translate-y-0.5 hover:border-[color:var(--color-accent)]/30 mp-animate-in" style={{ animationDelay: index * 80 + "ms" }}>
@@ -96,7 +96,7 @@ export function RecommendationCard({ rec, index }: RecommendationCardProps) {
                   <span className="text-text text-right">{v}</span>
                 </div>
               ))}
-              <a href={googleUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-accent text-[12.5px] font-semibold hover:underline mb-3">
+              <a href={platformUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-accent text-[12.5px] font-semibold hover:underline mb-3">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               Search on Google
             </a>
