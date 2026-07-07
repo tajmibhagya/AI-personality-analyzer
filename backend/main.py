@@ -40,7 +40,7 @@ app = FastAPI(title="AI Personality Analyzer", version="0.1.0", lifespan=lifespa
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://ai-personality-analyzer-iota.vercel.app", "https://ai-personality-analyzer-git-main-tajmibhagyas-projects.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

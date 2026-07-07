@@ -9,6 +9,6 @@ class EmotionModel:
 
     def predict(self, text: str) -> dict:
         # The model's max sequence is 512 tokens; rough char cap to avoid tokenizer warnings.
-        text = text[:2000]
+        text = text[:1500]
         results = self.pipe(text)[0]  # [{'label': ..., 'score': ...}, ...]
         return {r["label"]: round(float(r["score"]), 4) for r in results}
