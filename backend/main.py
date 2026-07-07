@@ -29,6 +29,15 @@ async def lifespan(app: FastAPI):
     models["personality"] = PersonalityModel()
     print("[startup] loading emotion model...")
     models["emotion"] = EmotionModel()
+    print("[startup] checking indexes...")
+    import subprocess, sys, pathlib
+    index_dir = pathlib.Path(__file__).parent / "index_store"
+    required = ["books.faiss", "films.faiss", "music.faiss", "activities.faiss"]
+    missing = [f for f in required if not (index_dir / f).exists()]
+    if missing:
+        print(f"[startup] Building missing indexes: {missing}")
+        build_script = pathlib.Path(__file__).parent / "data" / "recommender" / "build_indexes.py"
+        subprocess.run([sys.executable, str(build_script)], check=True)
     print("[startup] warming up KBs...")
     warm_up(["books", "films", "music", "activities"])
     print("[startup] ready")
