@@ -1,4 +1,3 @@
-import { TopNav } from "@/components/nav/TopNav";
 import { Container } from "@/components/layout/Container";
 import { SideQuickActions } from "@/components/dashboard/SideQuickActions";
 
@@ -9,7 +8,6 @@ type AppLayoutProps = {
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <>
-      <TopNav />
       <main>
         <Container className="py-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
