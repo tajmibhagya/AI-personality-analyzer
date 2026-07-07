@@ -24,14 +24,19 @@ function subtitleFor(metadata: Record<string, unknown>): string {
 
 function detailsFor(metadata: Record<string, unknown>): Array<[string, string]> {
   const fields: Array<[string, unknown]> = [
+    ["Author", metadata.author],
+    ["Director", metadata.director],
+    ["Artist", metadata.artist],
+    ["Year", metadata.year],
     ["Category", metadata.category],
-    ["Genre", metadata.genre],
+    ["Genre", Array.isArray(metadata.genres) ? (metadata.genres as string[]).join(", ") : metadata.genre],
     ["Time commitment", metadata.time_commitment],
     ["Social level", metadata.social_level],
     ["Energy level", metadata.energy_level],
     ["Where to find", metadata.where_to_find],
     ["Pages", metadata.pages],
     ["Runtime", metadata.runtime],
+    ["Personality fit", typeof metadata.personality_fit === "object" && metadata.personality_fit !== null ? (metadata.personality_fit as Record<string, unknown>).reasoning as string : null],
   ];
   return fields
     .filter(([, v]) => v !== undefined && v !== null && v !== "")
@@ -75,7 +80,7 @@ export function RecommendationCard({ rec, index }: RecommendationCardProps) {
         </div>
       ) : null}
 
-      {details.length > 0 || sourceUrl ? (
+      {true ? (
         <div className="border-t border-[color:var(--color-border-subtle)] pt-3 mt-3">
           <button type="button" onClick={() => setExpanded(!expanded)} className="text-faint text-[12.5px] font-semibold hover:text-text transition-colors flex items-center gap-1">
             {expanded ? "Hide details" : "More details"}
