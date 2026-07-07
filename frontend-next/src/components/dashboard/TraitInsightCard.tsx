@@ -5,8 +5,8 @@ type TraitInsightCardProps = {
     name: string;
     score: number;
     colorVar: string;
-    shortDescription: string;
-    yourDescription: string;
+    shortDescription?: string;
+    yourDescription?: string;
   };
 };
 

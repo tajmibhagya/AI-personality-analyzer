@@ -3,7 +3,7 @@ import { DownloadReportButton } from "@/components/pdf/DownloadReportButton";
 
 type Recommendation = {
   title: string;
-  reason: string;
+  reason?: string;
   match: "high" | "medium" | "low";
 };
 
