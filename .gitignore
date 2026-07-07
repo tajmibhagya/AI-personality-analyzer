@@ -25,3 +25,6 @@ frontend/.streamlit/secrets.toml
 **/.venv/
 *.pyc
 __pycache__/
+backend/ai-personality-analyzer/
+*.faiss
+index_store/
