@@ -1,5 +1,5 @@
 FROM python:3.11-slim
-# cache-bust: openai-pin-v2
+# cache-bust: groq-pin-v1
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
