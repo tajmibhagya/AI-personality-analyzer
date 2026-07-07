@@ -1,4 +1,5 @@
 FROM python:3.11-slim
+# cache-bust: openai-pin-v2
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
