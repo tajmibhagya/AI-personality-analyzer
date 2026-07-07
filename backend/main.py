@@ -48,20 +48,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="AI Personality Analyzer", version="0.1.0", lifespan=lifespan)
 
 
-import traceback
-from fastapi import Request
-from fastapi.responses import JSONResponse
-
-@app.get("/version")
-def version(): return {"version": "debug-v2", "commit": "896aef4"}
-
-@app.exception_handler(Exception)
-async def debug_exception_handler(request: Request, exc: Exception):
-    return JSONResponse(
-        status_code=500,
-        content={"error": str(exc), "traceback": traceback.format_exc()}
-    )
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://ai-personality-analyzer-iota.vercel.app", "https://ai-personality-analyzer-git-main-tajmibhagyas-projects.vercel.app"],
