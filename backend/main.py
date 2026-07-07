@@ -52,6 +52,9 @@ import traceback
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
+@app.get("/version")
+def version(): return {"version": "debug-v2", "commit": "896aef4"}
+
 @app.exception_handler(Exception)
 async def debug_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
