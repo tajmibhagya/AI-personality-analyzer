@@ -11,3 +11,6 @@ frontend-next/
 *.log
 .DS_Store
 node_modules/
+!backend/index_store/
+!backend/index_store/*.faiss
+!backend/index_store/*.meta.json
